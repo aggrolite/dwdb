@@ -1,0 +1,45 @@
+#!/usr/bin/env perl
+
+use Mojo::Base -strict;
+use Mojo::UserAgent;
+use Mojo::Util qw(dumper);
+
+sub print_results {
+    my $dom = shift;
+
+    my @router_info;
+
+    for my $router ($dom->find('tr.even, tr.odd')->each) {
+        my @text = $router->find('td')->text->each;
+        my @info;
+        my @labels = ('Manufacturer', 'Model', 'Revision', 'Supported', 'Activation required');
+        warn "Didn't get 5 labels!" if @labels != 5;
+        push @info, "$_: " . shift(@text) for @labels;
+        push @router_info, \@info;
+    }
+
+    say @router_info ? dumper(\@router_info) : 'No results!';
+}
+
+sub do_search {
+    my $q    = shift;
+    my $ua   = Mojo::UserAgent->new;
+    my $url  = 'http://www.dd-wrt.com/routerdb/de/routerResult.php';
+    my $post = $ua->post(
+        $url,
+        form => {
+            action   => 'routerList',
+            criteria => $q,
+            site     => 'drupal',
+        }
+    );
+    if (my $res = $post->success) { print_results($res->dom) }
+    else {
+        my ($err, $code) = $post->error;
+        die $code ? "$code response: $err" : "Connection error: $err";
+    }
+}
+
+my $query = join ' ', @ARGV;
+die 'You must specify a router name or model!' unless defined($query);
+do_search($query);
