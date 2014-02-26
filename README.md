@@ -1,5 +1,6 @@
-dwdb - Search the DD-WRT.com router database
-============================================
+# dwdb
+
+Search the DD-WRT.com router database
 
 ## Synopsis
 
