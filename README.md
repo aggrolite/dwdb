@@ -12,6 +12,8 @@ This script searches the DD-WRT router database, located [here](http://www.dd-wr
 
 Each argument given to the script is joined by a space. So running `dwdb foo bar baz` will do a search for "foo bar baz".
 
+Any results are placed into a data structure and printed to standard output.
+
 ## Author
 
 Written by Curtis Brandt <curtis@cpan.org>
