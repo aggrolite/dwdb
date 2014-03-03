@@ -14,6 +14,12 @@ Each argument given to the script is joined by a space. So running `dwdb foo bar
 
 Any results are placed into a data structure and printed to standard output.
 
+## Options
+
+* --yes
+
+    Boolean flag which displays ONLY routers supported by DD-WRT. Flag can also be abbreviated as *-y*
+
 ## Author
 
 Written by Curtis Brandt <curtis@cpan.org>

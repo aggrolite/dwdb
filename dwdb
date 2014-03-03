@@ -4,21 +4,35 @@ use Mojo::Base -strict;
 use Mojo::UserAgent;
 use Mojo::Util qw(dumper);
 
-sub print_results {
+use Getopt::Long qw(:config auto_abbrev);
+
+GetOptions(
+    yes => \my $YES,
+) or die 'oops';
+
+sub results {
     my $dom = shift;
 
     my @router_info;
 
     for my $router ($dom->find('tr.even, tr.odd')->each) {
         my @text = $router->find('td')->text->each;
-        my @info;
+        my %info;
         my @labels = ('Manufacturer', 'Model', 'Revision', 'Supported', 'Activation required');
         warn "Didn't get 5 labels!" if @labels != 5;
-        push @info, "$_: " . shift(@text) for @labels;
-        push @router_info, \@info;
+        $info{$_} = shift(@text) for @labels;
+        push @router_info, \%info;
     }
 
-    say @router_info ? dumper(\@router_info) : 'No results!';
+    if ($YES) {
+        my @filtered = grep { $_->{'Supported'} eq 'yes' } @router_info;
+        my $total = @router_info - @filtered;
+        return @filtered
+          ? dumper(\@filtered)
+          : 'No results, but ' . @router_info . ' unsupported routers were found.';
+    }
+
+    return @router_info ? dumper(\@router_info) : 'No results!';
 }
 
 sub do_search {
@@ -33,7 +47,7 @@ sub do_search {
             site     => 'drupal',
         }
     );
-    if (my $res = $post->success) { print_results($res->dom) }
+    if (my $res = $post->success) { say results($res->dom) }
     else {
         my ($err, $code) = $post->error;
         die $code ? "$code response: $err" : "Connection error: $err";
