@@ -17,10 +17,10 @@ sub results {
 
     for my $router ($dom->find('tr.even, tr.odd')->each) {
         my @text = $router->find('td')->text->each;
+        warn "Didn't get 5 text itmes!" if @text != 5;
         my %info;
         my @labels = ('Manufacturer', 'Model', 'Revision', 'Supported', 'Activation required');
-        warn "Didn't get 5 labels!" if @labels != 5;
-        $info{$_} = shift(@text) for @labels;
+        @info{@labels} = @text;
         push @router_info, \%info;
     }
 
