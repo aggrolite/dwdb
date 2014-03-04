@@ -10,6 +10,13 @@ GetOptions(
     yes => \my $YES,
 ) or die 'oops';
 
+sub only_supported{
+    my $results = shift or return undef;
+    [   map { delete $_->{Supported}; $_ }
+        grep { $_->{'Supported'} eq 'yes' } @$results
+    ];
+}
+
 sub results {
     my $dom = shift;
 
@@ -24,15 +31,12 @@ sub results {
         push @router_info, \%info;
     }
 
-    if ($YES) {
-        my @filtered = grep { $_->{'Supported'} eq 'yes' } @router_info;
-        my $total = @router_info - @filtered;
-        return @filtered
-          ? dumper(\@filtered)
-          : 'No results, but ' . @router_info . ' unsupported routers were found.';
-    }
-
-    return @router_info ? dumper(\@router_info) : 'No results!';
+    return
+        @router_info
+      ? $YES
+          ? only_supported(\@router_info)
+          : \@router_info
+      : 'No results!';
 }
 
 sub do_search {
@@ -47,7 +51,10 @@ sub do_search {
             site     => 'drupal',
         }
     );
-    if (my $res = $post->success) { say results($res->dom) }
+    if (my $res = $post->success) {
+        my $results = results($res->dom);
+        say ref($results) ? dumper($results) : $results;
+    }
     else {
         my ($err, $code) = $post->error;
         die $code ? "$code response: $err" : "Connection error: $err";
