@@ -24,7 +24,7 @@ sub results {
 
     for my $router ($dom->find('tr.even, tr.odd')->each) {
         my @text = $router->find('td')->text->each;
-        warn "Didn't get 5 text itmes!" if @text != 5;
+        warn "Didn't get 5 text items!" if @text != 5;
         my %info;
         my @labels = ('Manufacturer', 'Model', 'Revision', 'Supported', 'Activation required');
         @info{@labels} = @text;
